@@ -1,4 +1,4 @@
-package com.example.queentimer
+package com.goosegames.queentimer
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -25,21 +25,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.queentimer.ui.theme.QueenTimerTheme
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
+import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
+import com.goosegames.queentimer.models.User
+import com.goosegames.queentimer.ui.elements.DebugCard
+import com.goosegames.queentimer.ui.pages.LoginForm
 
 import network.ApiRepository
-import org.w3c.dom.Text
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,7 +51,6 @@ class MainActivity : ComponentActivity() {
 
                     LoginForm()
 
-
                     }
                 }
             }
@@ -60,41 +58,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun LoginForm() {
-    val scope = rememberCoroutineScope()
-    val apiRepo = ApiRepository()
-    var httpRes: HttpResponse
-    val emailState: TextFieldState = rememberTextFieldState()
-    val passwordState: TextFieldState = rememberTextFieldState()
-    var displayString: String by remember { mutableStateOf("") }
 
-    Column(
-        modifier = Modifier
-    ) {
-        TextField(
-            state = emailState,
-            label = { Text("Email") }
-
-        )
-        SecureTextField(
-            state = passwordState,
-            label = { Text("Password")}
-        )
-        Button(
-            onClick = {
-                scope.launch {
-                    httpRes = apiRepo.authLogin(email = emailState.text.toString(), password = passwordState.text.toString())
-                    displayString = httpRes.toString()
-                }
-            }
-        ) {
-            Text("Login")
-        }
-
-        CodeCard(jsonStr = displayString)
-    }
-}
 
 @Preview
 @Composable
@@ -102,29 +66,3 @@ fun LoginFormPreview() {
     LoginForm()
 }
 
-@Composable
-fun CodeCard(jsonStr: String) {
-    val scrollState = rememberScrollState()
-
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .verticalScroll(
-            state = scrollState,
-            enabled = true
-        )
-        .padding(all = 8.dp),
-    ) {
-        Text(
-            modifier = Modifier.padding(start = 12.dp, top=12.dp),
-            text = "response: ",
-            style = MaterialTheme.typography.labelSmall,
-            fontFamily = FontFamily.Monospace
-        )
-        Text(
-            modifier = Modifier.padding(all = 12.dp),
-            text = jsonStr,
-            fontFamily = FontFamily.Monospace
-        )
-    }
-
-}

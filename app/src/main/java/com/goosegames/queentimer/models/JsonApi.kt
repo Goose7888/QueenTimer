@@ -1,4 +1,4 @@
-package models
+package com.goosegames.queentimer.models
 
 import kotlinx.serialization.Serializable
 
