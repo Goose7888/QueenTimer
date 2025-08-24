@@ -5,19 +5,23 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.datastore.core.DataStore
-import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
-import com.example.queentimer.ui.theme.QueenTimerTheme
-import com.goosegames.queentimer.models.User
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.goosegames.queentimer.ui.pages.LoginPage
+import com.goosegames.queentimer.ui.pages.PreferencesPage
+import kotlinx.serialization.Serializable
+
+@Serializable
+object Login
+@Serializable
+object PreferencesInfo
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "credentials")
 class MainActivity : ComponentActivity() {
@@ -25,18 +29,14 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            QueenTimerTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    LoginPage(dataStore = dataStore, modifier = Modifier.padding(paddingValues = innerPadding))
-                }
+            val navController: NavHostController = rememberNavController()
+            NavHost(navController = navController, startDestination = Login)
+            {
+                composable<Login> { LoginPage(dataStore, navController) }
+                composable<PreferencesInfo> { PreferencesPage(navController) }
             }
+
         }
     }
-}
-
-@Preview
-@Composable
-fun LoginFormPreview() {
-//    LoginPage(dataStore = dataStore, modifier = Modifier)
 }
 
