@@ -18,7 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavController
 import com.example.queentimer.R
 import com.example.queentimer.ui.theme.QueenTimerTheme
-import kotlinx.serialization.Serializable
+import com.goosegames.queentimer.ui.elements.OptionsBar
 
 
 // Where to mess with user, region, code, building/room, sign out,
@@ -32,55 +32,23 @@ fun PreferencesPage(navController: NavController)
     QueenTimerTheme {
         Scaffold(
             topBar = {
-                TopAppBar (
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        titleContentColor = MaterialTheme.colorScheme.primary,
-                    ),
-                    title = {
-                        Text("Small Top App Bar")
-                    },
-                    navigationIcon = {
-                        IconButton(
-                            onClick = {
-                                navController.navigateUp()
-                            }
-                        )
-                        {
-                            Icon(
-                                painter = painterResource(R.drawable.arrow_back_24px),
-                                contentDescription = "Description"
-                            )
-                        }
-                    }
-                )
+                OptionsBar(navController)
             }
         )
         { innerPadding ->
             Column(
                 modifier = Modifier.padding(paddingValues = innerPadding)
             ) {
-                MenuBar()
                 Column(
                     Modifier
                         .verticalScroll(
                             state = rememberScrollState(),
                             enabled = true
                         )
-
                 ) {
-                    Text("World")
+                    Text("User Information:")
                 }
             }
         }
     }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun MenuBar()
-{
-    // back button on top-left
-
 }

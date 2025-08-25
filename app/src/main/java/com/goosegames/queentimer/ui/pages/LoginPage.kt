@@ -11,10 +11,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavController
 import com.example.queentimer.ui.theme.QueenTimerTheme
-import com.goosegames.queentimer.PreferencesInfo
+import com.goosegames.queentimer.MachineSelector
 import com.goosegames.queentimer.ui.elements.LoginForm
-import com.goosegames.queentimer.ui.elements.NewAccountButton
-import kotlinx.serialization.Serializable
 
 
 @Composable
@@ -38,7 +36,7 @@ fun DebugButton(navController: NavController)
         Button(
             modifier = Modifier.padding(paddingValues = innerPadding),
             onClick = {
-                navController.navigate(route = PreferencesInfo)
+                navController.navigate(route = MachineSelector)
             }
         ) {
             Text("Debug Button")
