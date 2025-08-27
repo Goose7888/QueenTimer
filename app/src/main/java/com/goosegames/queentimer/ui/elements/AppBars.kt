@@ -2,6 +2,7 @@ package com.goosegames.queentimer.ui.elements
 
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -12,16 +13,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
 import androidx.navigation.NavController
-import androidx.navigation.navOptions
 import com.example.queentimer.R
-import com.goosegames.queentimer.LocationSelector
-import com.goosegames.queentimer.Login
-import com.goosegames.queentimer.MachineSelector
-import com.goosegames.queentimer.Options
-import com.goosegames.queentimer.TimerManager
-import com.goosegames.queentimer.ui.pages.LocationSelectorPage
+import com.goosegames.queentimer.models.Globals
+import com.goosegames.queentimer.models.User
+import kotlinx.coroutines.launch
 
 enum class Page {
     LOCATION_SELECTOR,
@@ -40,7 +41,9 @@ fun MainNavigationBar(navController: NavController, page: Page)
         NavigationBarItem(
             selected = (page == Page.LOCATION_SELECTOR),
             onClick = {
-                navController.navigate(LocationSelector)
+                if (page != Page.LOCATION_SELECTOR) {
+                    navController.navigate((Globals.Pages.LocationSelector))
+                }
             },
             icon = {
                 Icon(
@@ -53,7 +56,9 @@ fun MainNavigationBar(navController: NavController, page: Page)
         NavigationBarItem(
             selected = (page == Page.MACHINE_SELECTOR),
             onClick = {
-                navController.navigate(MachineSelector)
+                if (page != Page.MACHINE_SELECTOR) {
+                    navController.navigate(Globals.Pages.MachineSelector)
+                }
             },
             icon = {
                 Icon(
@@ -66,7 +71,9 @@ fun MainNavigationBar(navController: NavController, page: Page)
         NavigationBarItem(
             selected = (page == Page.TIMER_MANAGER),
             onClick = {
-                navController.navigate(TimerManager)
+                if (page != Page.TIMER_MANAGER) {
+                    navController.navigate(Globals.Pages.TimerManager)
+                }
             },
             icon = {
                 Icon(
@@ -78,9 +85,10 @@ fun MainNavigationBar(navController: NavController, page: Page)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun MainTopBar(navController: NavController) {
+fun MainTopBar(dataStore: DataStore<Preferences>, navController: NavController) {
+    val scope = rememberCoroutineScope()
     CenterAlignedTopAppBar(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
@@ -95,13 +103,26 @@ fun MainTopBar(navController: NavController) {
         navigationIcon = {
             IconButton(
                 onClick = {
-                    navController.navigate(
-                        route = Login,
-                        navOptions =  navOptions {
-                            popUpTo<MachineSelector> { saveState = true }
-                            restoreState = true
+                    scope.launch {
+                        var loggingOut: Boolean = true
+                        // clear data store and user variable
+                        Globals.user = User()
+                        dataStore.edit { preferences ->
+                            preferences.clear()
                         }
-                    )
+
+                        // Present user with fresh login screen
+                        navController.navigate(
+                            route = Globals.Pages.Login,
+    //                        navOptions =  navOptions {
+    //                            popUpTo<Login> {
+    //                                inclusive = true
+    //                                saveState = true
+    //                            }
+    //                            restoreState = true
+                        )
+                        loggingOut = false
+                    }
                 }
             ) {
                 Icon(
@@ -113,7 +134,7 @@ fun MainTopBar(navController: NavController) {
         actions = {
             IconButton(
                 onClick = {
-                    navController.navigate(Options)
+                    navController.navigate(Globals.Pages.Options)
                 }
             ) {
                 Icon(

@@ -12,29 +12,3 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 
-@Composable
-fun DebugCard(jsonStr: String) {
-    val scrollState = rememberScrollState()
-
-    Card(modifier = Modifier
-        .fillMaxWidth()
-        .verticalScroll(
-            state = scrollState,
-            enabled = true
-        )
-        .padding(all = 8.dp),
-    ) {
-        Text(
-            modifier = Modifier.padding(start = 12.dp, top=12.dp),
-            text = "response: ",
-            style = MaterialTheme.typography.labelSmall,
-            fontFamily = FontFamily.Monospace
-        )
-        Text(
-            modifier = Modifier.padding(all = 12.dp),
-            text = jsonStr,
-            fontFamily = FontFamily.Monospace
-        )
-    }
-
-}

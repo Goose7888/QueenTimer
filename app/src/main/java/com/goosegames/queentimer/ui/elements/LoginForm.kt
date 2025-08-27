@@ -1,6 +1,5 @@
 package com.goosegames.queentimer.ui.elements
 
-import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -19,17 +18,16 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.goosegames.queentimer.models.User
+import androidx.navigation.NavController
+import com.goosegames.queentimer.models.Globals
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import network.ApiRepository
 
 @Composable
-fun LoginForm(dataStore: DataStore<Preferences>) {
+fun LoginForm(dataStore: DataStore<Preferences>, navController: NavController) {
     val scope = rememberCoroutineScope()
     val apiRepo = ApiRepository()
     var httpRes: HttpResponse
@@ -55,14 +53,19 @@ fun LoginForm(dataStore: DataStore<Preferences>) {
                     httpRes = apiRepo.authLogin(email = emailState.text.toString(), password = passwordState.text.toString())
                     displayString = httpRes.toString()
                     if (httpRes.status.isSuccess()) {
-                        val user: User = httpRes.body()
+                        Globals.user = httpRes.body()
+
+                        // Saves user guid and auth token in persistent storage
                         val userGuid = stringPreferencesKey("user_guid")
                         val allianceAuthToken = stringPreferencesKey("alliance_auth_token")
                         dataStore.edit { credentials ->
-                            credentials[userGuid] = user.data?.id.toString()
+                            credentials[userGuid] = Globals.user.data?.id.toString()
                             credentials[allianceAuthToken] =
                                 httpRes.headers["alliancels-auth-token"] as String
                         }
+
+                        // Navigate to Machine Selector
+                        navController.navigate(Globals.Pages.MachineSelector)
                     }
                 }
             }

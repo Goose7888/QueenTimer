@@ -6,6 +6,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.navigation.NavController
 import com.example.queentimer.ui.theme.QueenTimerTheme
 import com.goosegames.queentimer.ui.elements.MainNavigationBar
@@ -13,11 +15,11 @@ import com.goosegames.queentimer.ui.elements.MainTopBar
 import com.goosegames.queentimer.ui.elements.Page
 
 @Composable
-fun LocationSelectorPage(navController: NavController) {
+fun LocationSelectorPage(dataStore: DataStore<Preferences>, navController: NavController) {
     QueenTimerTheme {
         Scaffold(
             topBar = {
-                MainTopBar(navController)
+                MainTopBar(dataStore, navController)
             },
             bottomBar = {
                 MainNavigationBar(navController, Page.LOCATION_SELECTOR)
