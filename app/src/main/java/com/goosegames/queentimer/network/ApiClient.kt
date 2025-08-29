@@ -1,4 +1,4 @@
-package network
+package com.goosegames.queentimer.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -17,7 +17,7 @@ import kotlinx.serialization.json.Json
 
 object ApiClient {
 
-    //Configure the HttpCLient
+    //Configure the HttpClient
     @OptIn(ExperimentalSerializationApi::class)
     var client = HttpClient(Android) {
 

@@ -24,12 +24,12 @@ import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.isSuccess
 import kotlinx.coroutines.launch
-import network.ApiRepository
+import com.goosegames.queentimer.network.ApiRepository
 
 @Composable
 fun LoginForm(dataStore: DataStore<Preferences>, navController: NavController) {
     val scope = rememberCoroutineScope()
-    val apiRepo = ApiRepository()
+//    val apiRepo = ApiRepository()
     var httpRes: HttpResponse
     val emailState: TextFieldState = rememberTextFieldState()
     val passwordState: TextFieldState = rememberTextFieldState()
@@ -50,7 +50,8 @@ fun LoginForm(dataStore: DataStore<Preferences>, navController: NavController) {
         Button(
             onClick = {
                 scope.launch {
-                    httpRes = apiRepo.authLogin(email = emailState.text.toString(), password = passwordState.text.toString())
+                    var loading: Boolean = true
+                    httpRes = ApiRepository.authLogin(email = emailState.text.toString(), password = passwordState.text.toString())
                     displayString = httpRes.toString()
                     if (httpRes.status.isSuccess()) {
                         Globals.user = httpRes.body()
@@ -63,10 +64,10 @@ fun LoginForm(dataStore: DataStore<Preferences>, navController: NavController) {
                             credentials[allianceAuthToken] =
                                 httpRes.headers["alliancels-auth-token"] as String
                         }
-
                         // Navigate to Machine Selector
                         navController.navigate(Globals.Pages.MachineSelector)
                     }
+                    loading = false
                 }
             }
         ) {

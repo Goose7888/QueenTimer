@@ -12,6 +12,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.navigation.NavController
 import com.goosegames.queentimer.models.Globals
+import com.goosegames.queentimer.network.ApiRepository
+import io.ktor.client.call.body
+import io.ktor.client.statement.HttpResponse
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.timeout
 import kotlinx.coroutines.launch
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @SuppressLint("CoroutineCreationDuringComposition")
@@ -37,16 +41,38 @@ fun LoadingPage(dataStore: DataStore<Preferences>, navController: NavController)
         )
 
         scope.launch {
-            if (!initialLogin(dataStore, navController)) {
+            // If creds are good, go go in the app
+            // If not, make them log in
+            if (initialLogin(dataStore, navController)) {
+                navController.navigate(Globals.Pages.MachineSelector)
+            } else {
                 navController.navigate(Globals.Pages.Login)
             }
         }
     }
 }
 
-// @Returns skipLogin: true if login page was skipped
-@OptIn(FlowPreview::class)
+// Returns: skipLogin: true if login page was skipped
 suspend fun initialLogin(dataStore: DataStore<Preferences>, navController: NavController): Boolean {
+    // sets vars in globals to a not null value if successful
+    tryRetrieveData(dataStore)
+
+    if (Globals.userGuid == null || Globals.allianceAuthToken == null) {
+        return false
+    }
+
+    val httpRes: HttpResponse? = ApiRepository.authStoredLogin(allianceAuthToken = Globals.allianceAuthToken.toString(), userId = Globals.userGuid.toString())
+
+    if (httpRes?.status?.value == 200) {
+        Globals.user = httpRes.body()
+        return true
+    }
+
+    return false
+}
+
+@OptIn(FlowPreview::class)
+suspend fun tryRetrieveData(dataStore: DataStore<Preferences>) {
     val userGuidKey: Preferences.Key<String> = stringPreferencesKey("user_guid")
     val allianceAuthTokenKey: Preferences.Key<String> =
         stringPreferencesKey("alliance_auth_token")
@@ -63,6 +89,7 @@ suspend fun initialLogin(dataStore: DataStore<Preferences>, navController: NavCo
 
     // Store dataStore values in Globals.xxx
     // WHY DO THESE FLOWS NEVER RESOLVE THEMSELVES???
+    // This made me crash out for 4 hours
     val getUserGuid: Job = CoroutineScope(context = Dispatchers.IO).launch {
         userGuidFlow
             .timeout(100.milliseconds)
@@ -97,10 +124,4 @@ suspend fun initialLogin(dataStore: DataStore<Preferences>, navController: NavCo
 
     getUserGuid.join()
     getAuthToken.join()
-
-    if (Globals.userGuid == null || Globals.allianceAuthToken == null) {
-        return false
-    }
-    navController.navigate(Globals.Pages.MachineSelector)
-    return true
 }
